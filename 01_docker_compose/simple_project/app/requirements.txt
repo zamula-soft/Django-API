@@ -1,2 +1,6 @@
 django==4.0.4
 uwsgi==2.0.20
+flake8==4.0
+python-dotenv==0.20
+psycopg2==2.9.3
+django_split_settings==1.1.0
