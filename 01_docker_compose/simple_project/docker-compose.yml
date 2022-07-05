@@ -1,17 +1,40 @@
 version: '3'
 services:
-  service:
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      -./example/.env
+  volumes:
+    postgres_data:
+
+  django:
     build: ./app
+    command: python manage.py runserver localhost:8000
+    depends_on:
+      - db
+    ports:
+      - 8000:8000
+    env_file:
+      -./example/.env
+    volumes:
+      - static:/app/static
+      - media:/app/media
+      - nginx_conf:/app/configs/
     expose:
       - "8000"
 
-  nginx:
-    image: nginx:latest
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./configs:/etc/nginx/conf.d:ro
-      - ./data:/data/:ro
-    depends_on:
-      - service
-    ports:
-      - "80:80"
+    nginx:
+      image: nginx:latest
+      ports:
+        - "80:80"
+      volumes:
+        - static:/app/static
+        - media:/app/media
+        - ./nginx.conf:/etc/nginx/nginx.conf:ro
+        - ./configs:/etc/nginx/conf.d:ro
+        - ./data:/data/:ro
+      depends_on:
+        - django
+      restart: always

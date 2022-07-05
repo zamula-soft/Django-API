@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      -./config/.env
+
+  volumes:
+    postgres_data:
+
+
+  django:
+    build: ./02_movies_admin
+    command: python manage.py runserver localhost:8000
+    depends_on:
+      - db
+    ports:
+      - 8000:8000
+    env_file:
+      -./config/.env
+    volumes:
+      - static:/02_movies_admin/static
+      - media:/02_movies_admin/media
+      - nginx_conf:/02_movies_admin/nginx/
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - static:/02_movies_admin/static
+      - media:/02_movies_admin/media
+      - nginx_conf:/etc/nginx/conf.d/
+    depends_on:
+      - django
+    restart: always
