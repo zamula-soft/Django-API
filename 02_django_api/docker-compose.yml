@@ -13,27 +13,25 @@ services:
 
 
   django:
-    build: ./02_movies_admin
-    command: python manage.py runserver localhost:8000
+    build: ./02_django_api
     depends_on:
       - db
-    ports:
-      - 8000:8000
     env_file:
       -./config/.env
     volumes:
-      - static:/02_movies_admin/static
-      - media:/02_movies_admin/media
-      - nginx_conf:/02_movies_admin/nginx/
+      - static:/02_django_api/static
+      - media:/02_django_api/media
+      - nginx_conf:/02_django_api/nginx/
 
   nginx:
     image: nginx:latest
     ports:
       - "80:80"
     volumes:
-      - static:/02_movies_admin/static
-      - media:/02_movies_admin/media
-      - nginx_conf:/etc/nginx/conf.d/
+      - static:/02_django_api/static
+      - media:/02_django_api/media
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./configs:/etc/nginx/conf.d:ro
     depends_on:
       - django
     restart: always
